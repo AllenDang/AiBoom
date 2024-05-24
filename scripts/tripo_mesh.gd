@@ -9,6 +9,11 @@ var prompt: String
 var task_id: String
 var save_to_dir: String
 
+# Bounding box
+var is_selected = false
+var bbox_mesh_instance = null
+var bbox_material = null
+
 # Variables to store the previous mouse position
 var _previous_mouse_position = Vector2.ZERO
 var _dragging = false
@@ -42,9 +47,9 @@ func _init(_key: String, _prompt: String, _save_to_dir: String):
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	add_to_group(GROUP_TRIPO_MESH)
+
 	var n = get_tree().get_nodes_in_group(GROUP_TRIPO_MESH).size()
 	position = _generate_spiral_grid(n, 1.2, 1.2)
-	print("generate %d at %v" % [n, position])
 
 	self.progress = prefab_progress_indicator_3d.instantiate()
 	self.progress.name = "progress"
@@ -59,11 +64,28 @@ func _exit_tree() -> void:
 
 func _input(event):
 	# If the left mouse button is pressed, start dragging
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			_dragging = event.pressed
-			if _dragging:
-				_previous_mouse_position = event.position
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		_dragging = event.pressed
+		if _dragging:
+			_previous_mouse_position = event.position
+
+		if event.pressed:
+			var camera = get_viewport().get_camera_3d()
+			var from = camera.project_ray_origin(event.position)
+			var to = from + camera.project_ray_normal(event.position) * 1000
+
+			var space_state = get_world_3d().direct_space_state
+			var query = PhysicsRayQueryParameters3D.create(from, to)
+			query.collide_with_areas = true
+
+			var result = space_state.intersect_ray(query)
+
+			if result and result.collider.get_parent().name == GLTF_NODE:
+				is_selected = not is_selected
+				if is_selected:
+					draw_bounding_box()
+				else:
+					bbox_mesh_instance.mesh.clear_surfaces()
 
 	# If the mouse is being dragged, rotate the node
 	if has_node(GLTF_NODE) and _dragging and event is InputEventMouseMotion:
@@ -89,6 +111,21 @@ func _on_download_success(_code: int, data: Dictionary):
 	if err == OK:
 		var gltf_node = gltf_doc.generate_scene(gltf_state)
 		gltf_node.name = GLTF_NODE
+
+		var aabb = get_gltf_aabb(gltf_node)
+		add_collision_shape_to_gltf(gltf_node, aabb)
+
+		# prepare bounding box
+		bbox_mesh_instance = MeshInstance3D.new()
+		gltf_node.add_child(bbox_mesh_instance)
+
+		var bbox_mesh = ImmediateMesh.new()
+		bbox_mesh_instance.mesh = bbox_mesh
+
+		bbox_material = StandardMaterial3D.new()
+		bbox_material.albedo_color = Color(1, 0, 0)  # Red color
+		bbox_mesh_instance.material_override = bbox_material
+
 		add_child(gltf_node)
 	else:
 		print("cannot load gltf scene")
@@ -186,3 +223,90 @@ func _generate_spiral_grid(n: int, step_x: float, step_y: float) -> Vector3:
 				change_dir_count = 0
 
 	return pos
+
+
+# Function to get the AABB of a GLTFNode
+func get_gltf_aabb(gltf_node: Node3D) -> AABB:
+	var combined_aabb = AABB()
+	var first_aabb = true
+
+	var stack = [gltf_node]
+
+	while stack.size() > 0:
+		var current_node = stack.pop_back()
+
+		for child in current_node.get_children():
+			if child is MeshInstance3D:
+				var mesh_instance = child as MeshInstance3D
+				var mesh_aabb = mesh_instance.get_aabb()
+
+				if first_aabb:
+					combined_aabb = mesh_aabb
+					first_aabb = false
+				else:
+					combined_aabb = combined_aabb.merge(mesh_aabb)
+			stack.push_back(child)
+
+	return combined_aabb
+
+
+# Function to add a collision shape to a GLTFNode using its AABB
+func add_collision_shape_to_gltf(gltf_node: Node3D, aabb: AABB):
+	var collision_shape = CollisionShape3D.new()
+	var box_shape = BoxShape3D.new()
+
+	box_shape.extents = aabb.size * 0.5
+	collision_shape.shape = box_shape
+
+	var static_body = StaticBody3D.new()
+	static_body.add_child(collision_shape)
+	gltf_node.add_child(static_body)
+
+
+func draw_bounding_box():
+	if not has_node(GLTF_NODE):
+		return
+
+	var aabb = get_gltf_aabb(get_node(GLTF_NODE))
+
+	var bbox_mesh = bbox_mesh_instance.mesh
+	bbox_mesh.clear_surfaces()
+
+	bbox_mesh.surface_begin(Mesh.PRIMITIVE_LINES, bbox_material)
+
+	var vertices = [
+		Vector3(aabb.position.x, aabb.position.y, aabb.position.z),
+		Vector3(aabb.position.x + aabb.size.x, aabb.position.y, aabb.position.z),
+		Vector3(aabb.position.x + aabb.size.x, aabb.position.y + aabb.size.y, aabb.position.z),
+		Vector3(aabb.position.x, aabb.position.y + aabb.size.y, aabb.position.z),
+		Vector3(aabb.position.x, aabb.position.y, aabb.position.z + aabb.size.z),
+		Vector3(aabb.position.x + aabb.size.x, aabb.position.y, aabb.position.z + aabb.size.z),
+		Vector3(
+			aabb.position.x + aabb.size.x,
+			aabb.position.y + aabb.size.y,
+			aabb.position.z + aabb.size.z
+		),
+		Vector3(aabb.position.x, aabb.position.y + aabb.size.y, aabb.position.z + aabb.size.z)
+	]
+
+	# Draw lines between the vertices to form the bounding box
+	var edges = [
+		[0, 1],
+		[1, 2],
+		[2, 3],
+		[3, 0],  # Bottom face
+		[4, 5],
+		[5, 6],
+		[6, 7],
+		[7, 4],  # Top face
+		[0, 4],
+		[1, 5],
+		[2, 6],
+		[3, 7]  # Vertical lines
+	]
+
+	for edge in edges:
+		bbox_mesh.surface_add_vertex(vertices[edge[0]])
+		bbox_mesh.surface_add_vertex(vertices[edge[1]])
+
+	bbox_mesh.surface_end()
