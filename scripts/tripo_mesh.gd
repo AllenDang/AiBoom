@@ -3,6 +3,7 @@ extends Node3D
 class_name TripoMesh
 
 const GROUP_TRIPO_MESH: String = "tripo_mesh"
+const GLTF_NODE: String = "gltf_node"
 
 var prompt: String
 var task_id: String
@@ -38,20 +39,6 @@ func _init(_key: String, _prompt: String, _save_to_dir: String):
 	model_generate_failed.connect(_on_model_generate_failed)
 
 
-func _input(event):
-	# If the left mouse button is pressed, start dragging
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			_dragging = event.pressed
-			if _dragging:
-				_previous_mouse_position = event.position
-
-	# If the mouse is being dragged, rotate the node
-	if _dragging and event is InputEventMouseMotion:
-		var delta = event.relative
-		rotate_y(delta.x * rotation_sensitivity)
-
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	add_to_group(GROUP_TRIPO_MESH)
@@ -68,6 +55,20 @@ func _ready() -> void:
 
 func _exit_tree() -> void:
 	remove_from_group(GROUP_TRIPO_MESH)
+
+
+func _input(event):
+	# If the left mouse button is pressed, start dragging
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_dragging = event.pressed
+			if _dragging:
+				_previous_mouse_position = event.position
+
+	# If the mouse is being dragged, rotate the node
+	if has_node(GLTF_NODE) and _dragging and event is InputEventMouseMotion:
+		var delta = event.relative
+		get_node(GLTF_NODE).rotate_y(delta.x * rotation_sensitivity)
 
 
 func _on_model_generate_success(url: String):
@@ -87,6 +88,7 @@ func _on_download_success(_code: int, data: Dictionary):
 	var err = gltf_doc.append_from_file(data.path, gltf_state)
 	if err == OK:
 		var gltf_node = gltf_doc.generate_scene(gltf_state)
+		gltf_node.name = GLTF_NODE
 		add_child(gltf_node)
 	else:
 		print("cannot load gltf scene")
