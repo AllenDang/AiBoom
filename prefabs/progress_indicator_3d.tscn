@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3 uid="uid://b2tec1wdus1y8"]
+
+[ext_resource type="Script" path="res://scripts/wc_progress_indicator_3d.gd" id="1_lt2k0"]
+[ext_resource type="Texture2D" uid="uid://c3dyauqv42ybd" path="res://textures/circle.png" id="2_kvu70"]
+
+[sub_resource type="QuadMesh" id="QuadMesh_82an1"]
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_imiqb"]
+viewport_path = NodePath("SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2prk4"]
+resource_local_to_scene = true
+albedo_texture = SubResource("ViewportTexture_imiqb")
+
+[node name="ProgressIndicator3D" type="MeshInstance3D"]
+mesh = SubResource("QuadMesh_82an1")
+surface_material_override/0 = SubResource("StandardMaterial3D_2prk4")
+script = ExtResource("1_lt2k0")
+
+[node name="SubViewport" type="SubViewport" parent="."]
+transparent_bg = true
+handle_input_locally = false
+gui_disable_input = true
+size = Vector2i(200, 200)
+
+[node name="CenterContainer" type="CenterContainer" parent="SubViewport"]
+custom_minimum_size = Vector2(200, 200)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureProgressBar" type="TextureProgressBar" parent="SubViewport/CenterContainer"]
+layout_mode = 2
+value = 60.0
+fill_mode = 4
+texture_progress = ExtResource("2_kvu70")
+
+[node name="Label" type="Label" parent="SubViewport/CenterContainer"]
+layout_mode = 2
+text = "90%"

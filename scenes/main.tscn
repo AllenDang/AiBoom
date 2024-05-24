@@ -1,0 +1,257 @@
+[gd_scene load_steps=11 format=3 uid="uid://chnbwp2h2sken"]
+
+[ext_resource type="Script" path="res://scripts/sc_main.gd" id="1_ed30y"]
+[ext_resource type="StyleBox" uid="uid://dpj3ieuxwedm0" path="res://style_margin_panel.stylebox" id="2_h80cv"]
+[ext_resource type="Script" path="res://scripts/cam_control.gd" id="2_mw3nt"]
+[ext_resource type="Texture2D" uid="uid://c3dyauqv42ybd" path="res://textures/circle.png" id="2_rm6on"]
+[ext_resource type="Script" path="res://scripts/wc_spinner.gd" id="4_idnar"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_olrko"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_2fehy"]
+panorama = SubResource("CompressedTexture2D_olrko")
+
+[sub_resource type="Sky" id="Sky_rrgnn"]
+sky_material = SubResource("PanoramaSkyMaterial_2fehy")
+
+[sub_resource type="Environment" id="Environment_7u4at"]
+background_mode = 1
+sky = SubResource("Sky_rrgnn")
+tonemap_mode = 2
+glow_enabled = true
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_363vl"]
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+bg_color = Color(0.190762, 0.190762, 0.190762, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Root" type="Node3D"]
+script = ExtResource("1_ed30y")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.91277, 0.408474, 0, -0.408474, 0.91277, 0, 0, 0)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_7u4at")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.81768)
+script = ExtResource("2_mw3nt")
+
+[node name="Settings" type="PanelContainer" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -177.72
+offset_right = 40.0
+offset_bottom = -137.72
+grow_vertical = 0
+theme_override_styles/panel = ExtResource("2_h80cv")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Settings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Settings/VBoxContainer"]
+layout_mode = 2
+text = "Setting"
+
+[node name="ColOpenAI" type="HBoxContainer" parent="Settings/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Settings/VBoxContainer/ColOpenAI"]
+custom_minimum_size = Vector2(117, 2.08165e-12)
+layout_mode = 2
+text = "OpenAI Key"
+
+[node name="LeOpenAIKey" type="LineEdit" parent="Settings/VBoxContainer/ColOpenAI"]
+custom_minimum_size = Vector2(400, 2.08165e-12)
+layout_mode = 2
+secret = true
+
+[node name="ColTripo" type="HBoxContainer" parent="Settings/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Settings/VBoxContainer/ColTripo"]
+custom_minimum_size = Vector2(117, 2.08165e-12)
+layout_mode = 2
+text = "Tripo API Key"
+
+[node name="LeTripoKey" type="LineEdit" parent="Settings/VBoxContainer/ColTripo"]
+custom_minimum_size = Vector2(400, 2.08165e-12)
+layout_mode = 2
+secret = true
+
+[node name="ColSaveDir" type="HBoxContainer" parent="Settings/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="Settings/VBoxContainer/ColSaveDir"]
+layout_mode = 2
+text = "Save models to"
+
+[node name="LeSavePath" type="LineEdit" parent="Settings/VBoxContainer/ColSaveDir"]
+custom_minimum_size = Vector2(400, 2.08165e-12)
+layout_mode = 2
+editable = false
+
+[node name="BtnBrowse" type="Button" parent="Settings/VBoxContainer/ColSaveDir"]
+layout_mode = 2
+text = "Browse"
+
+[node name="FileDialog" type="FileDialog" parent="Settings"]
+title = "Open a Directory"
+ok_button_text = "Select Current Folder"
+file_mode = 2
+access = 2
+use_native_dialog = true
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -163.87
+offset_bottom = -140.87
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Label" type="Label" parent="CenterContainer"]
+layout_mode = 2
+text = "LMB: rotate  RMB: pan  Wheel: zoom  E: toogle wireframe"
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = ExtResource("2_h80cv")
+
+[node name="LeftRow" type="HBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Col" type="VBoxContainer" parent="PanelContainer/LeftRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="PanelContainer/LeftRow/Col"]
+layout_mode = 2
+text = "Prompt"
+
+[node name="LePrompt" type="LineEdit" parent="PanelContainer/LeftRow/Col"]
+layout_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/LeftRow/Col"]
+layout_mode = 2
+
+[node name="BtnGenerate" type="Button" parent="PanelContainer/LeftRow/Col/CenterContainer"]
+layout_mode = 2
+text = "Generate"
+
+[node name="RightRow" type="VBoxContainer" parent="PanelContainer/LeftRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="PanelContainer/LeftRow/RightRow"]
+layout_mode = 2
+text = "Convert"
+
+[node name="Col" type="HBoxContainer" parent="PanelContainer/LeftRow/RightRow"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CbQuad" type="CheckBox" parent="PanelContainer/LeftRow/RightRow/Col"]
+layout_mode = 2
+text = "QuadRemesh"
+
+[node name="Label" type="Label" parent="PanelContainer/LeftRow/RightRow/Col"]
+layout_mode = 2
+text = "Face limit"
+
+[node name="SbFacelimit" type="SpinBox" parent="PanelContainer/LeftRow/RightRow/Col"]
+layout_mode = 2
+max_value = 50000.0
+step = 1000.0
+value = 50000.0
+
+[node name="Label2" type="Label" parent="PanelContainer/LeftRow/RightRow/Col"]
+layout_mode = 2
+text = "Texture format"
+
+[node name="ObTextureFormat" type="OptionButton" parent="PanelContainer/LeftRow/RightRow/Col"]
+layout_mode = 2
+item_count = 6
+selected = 0
+popup/item_0/text = "JPEG"
+popup/item_0/id = 0
+popup/item_1/text = "PNG"
+popup/item_1/id = 1
+popup/item_2/text = "BMP"
+popup/item_2/id = 2
+popup/item_3/text = "TGA"
+popup/item_3/id = 3
+popup/item_4/text = "HDR"
+popup/item_4/id = 4
+popup/item_5/text = "DDX"
+popup/item_5/id = 5
+
+[node name="Label3" type="Label" parent="PanelContainer/LeftRow/RightRow/Col"]
+layout_mode = 2
+text = "Texture size"
+
+[node name="SbTextureSize" type="SpinBox" parent="PanelContainer/LeftRow/RightRow/Col"]
+layout_mode = 2
+max_value = 2048.0
+step = 100.0
+value = 2000.0
+
+[node name="CbPivotToBottom" type="CheckBox" parent="PanelContainer/LeftRow/RightRow/Col"]
+layout_mode = 2
+text = "Pivot to buttom"
+
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/LeftRow/RightRow"]
+layout_mode = 2
+
+[node name="BtnBatchConvert" type="Button" parent="PanelContainer/LeftRow/RightRow/CenterContainer"]
+layout_mode = 2
+text = "Batch Convert"
+
+[node name="Toast" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_363vl")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Toast"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Spinner" type="TextureProgressBar" parent="Toast/HBoxContainer"]
+layout_mode = 2
+value = 100.0
+fill_mode = 4
+texture_progress = ExtResource("2_rm6on")
+radial_fill_degrees = 60.0
+script = ExtResource("4_idnar")
+
+[node name="Label" type="Label" parent="Toast/HBoxContainer"]
+layout_mode = 2
+text = "Loading...."
