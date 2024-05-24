@@ -96,6 +96,7 @@ func _on_btn_generate_pressed():
 		accept_dialog.popup_centered()
 		return
 
+	btn_generate.disabled = true
 	var viewport = get_viewport()
 	viewport.debug_draw = RenderingServer.VIEWPORT_DEBUG_DRAW_DISABLED
 
@@ -161,12 +162,15 @@ func _on_dalle_completed(_response_code: int, data: Dictionary):
 		process_finished.emit("Failed to generate image...")
 		return
 
+	btn_generate.disabled = false
+
 	var url = data.data[0].url
 	openai_describe_image(url)
 
 
 func _on_dalle_error(_response_code: int):
 	process_finished.emit("Failed to generate image")
+	btn_generate.disabled = false
 
 
 func openai_describe_image(url: String):
@@ -206,6 +210,8 @@ func _on_gpt_completed(_response_code: int, data: Dictionary):
 
 	process_finished.emit("Found %d objects, generating 3d models..." % [lines.size()])
 
+	btn_generate.disabled = false
+
 	var save_dir = config.get_value(CFG_SEC_GENERAL, CFG_KEY_SAVE_DIR)
 	for line in lines:
 		var tripo_mesh = TripoMesh.new(
@@ -216,6 +222,7 @@ func _on_gpt_completed(_response_code: int, data: Dictionary):
 
 func _on_gpt_error(_response_code: int):
 	process_finished.emit("Failed to identify objects in the image")
+	btn_generate.disabled = false
 
 
 func _input(event: InputEvent) -> void:
