@@ -44,85 +44,21 @@ environment = SubResource("Environment_7u4at")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.81768)
 script = ExtResource("2_mw3nt")
 
-[node name="Settings" type="PanelContainer" parent="."]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -177.72
-offset_right = 40.0
-offset_bottom = -137.72
-grow_vertical = 0
-theme_override_styles/panel = ExtResource("2_h80cv")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Settings"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Settings/VBoxContainer"]
-layout_mode = 2
-text = "Setting"
-
-[node name="ColOpenAI" type="HBoxContainer" parent="Settings/VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Settings/VBoxContainer/ColOpenAI"]
-custom_minimum_size = Vector2(117, 2.08165e-12)
-layout_mode = 2
-text = "OpenAI Key"
-
-[node name="LeOpenAIKey" type="LineEdit" parent="Settings/VBoxContainer/ColOpenAI"]
-custom_minimum_size = Vector2(400, 2.08165e-12)
-layout_mode = 2
-secret = true
-
-[node name="ColTripo" type="HBoxContainer" parent="Settings/VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Settings/VBoxContainer/ColTripo"]
-custom_minimum_size = Vector2(117, 2.08165e-12)
-layout_mode = 2
-text = "Tripo API Key"
-
-[node name="LeTripoKey" type="LineEdit" parent="Settings/VBoxContainer/ColTripo"]
-custom_minimum_size = Vector2(400, 2.08165e-12)
-layout_mode = 2
-secret = true
-
-[node name="ColSaveDir" type="HBoxContainer" parent="Settings/VBoxContainer"]
-layout_mode = 2
-
-[node name="Label" type="Label" parent="Settings/VBoxContainer/ColSaveDir"]
-layout_mode = 2
-text = "Save models to"
-
-[node name="LeSavePath" type="LineEdit" parent="Settings/VBoxContainer/ColSaveDir"]
-custom_minimum_size = Vector2(400, 2.08165e-12)
-layout_mode = 2
-editable = false
-
-[node name="BtnBrowse" type="Button" parent="Settings/VBoxContainer/ColSaveDir"]
-layout_mode = 2
-text = "Browse"
-
-[node name="FileDialog" type="FileDialog" parent="Settings"]
-title = "Open a Directory"
-ok_button_text = "Select Current Folder"
-file_mode = 2
-access = 2
-use_native_dialog = true
-
 [node name="CenterContainer" type="CenterContainer" parent="."]
-anchors_preset = 12
+anchors_preset = 3
+anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -163.87
-offset_bottom = -140.87
-grow_horizontal = 2
+offset_left = -676.0
+offset_top = -158.73
+offset_bottom = -135.73
+grow_horizontal = 0
 grow_vertical = 0
 
 [node name="Label" type="Label" parent="CenterContainer"]
 layout_mode = 2
-text = "LMB: rotate  RMB: pan  Wheel: zoom  E: toogle wireframe"
+text = "LMB: rotate  RMB: pan  Wheel: zoom  E: toogle wireframe  | +: ui zoom out  -: ui zoom in | ESC: setting"
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 anchors_preset = 12
@@ -255,3 +191,75 @@ script = ExtResource("4_idnar")
 [node name="Label" type="Label" parent="Toast/HBoxContainer"]
 layout_mode = 2
 text = "Loading...."
+
+[node name="AcceptDialog" type="AcceptDialog" parent="."]
+size = Vector2i(334, 100)
+
+[node name="SettingDialog" type="Window" parent="."]
+title = "Settings"
+size = Vector2i(620, 170)
+visible = false
+
+[node name="MarginContainer" type="MarginContainer" parent="SettingDialog"]
+offset_right = 40.0
+offset_bottom = 40.0
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Row" type="VBoxContainer" parent="SettingDialog/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ColOpenAI" type="HBoxContainer" parent="SettingDialog/MarginContainer/Row"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingDialog/MarginContainer/Row/ColOpenAI"]
+custom_minimum_size = Vector2(117, 2.08165e-12)
+layout_mode = 2
+text = "OpenAI Key"
+
+[node name="LeOpenAIKey" type="LineEdit" parent="SettingDialog/MarginContainer/Row/ColOpenAI"]
+custom_minimum_size = Vector2(400, 2.08165e-12)
+layout_mode = 2
+secret = true
+
+[node name="ColTripo" type="HBoxContainer" parent="SettingDialog/MarginContainer/Row"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingDialog/MarginContainer/Row/ColTripo"]
+custom_minimum_size = Vector2(117, 2.08165e-12)
+layout_mode = 2
+text = "Tripo API Key"
+
+[node name="LeTripoKey" type="LineEdit" parent="SettingDialog/MarginContainer/Row/ColTripo"]
+custom_minimum_size = Vector2(400, 2.08165e-12)
+layout_mode = 2
+secret = true
+
+[node name="ColSaveDir" type="HBoxContainer" parent="SettingDialog/MarginContainer/Row"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="SettingDialog/MarginContainer/Row/ColSaveDir"]
+layout_mode = 2
+text = "Save models to"
+
+[node name="LeSavePath" type="LineEdit" parent="SettingDialog/MarginContainer/Row/ColSaveDir"]
+custom_minimum_size = Vector2(400, 2.08165e-12)
+layout_mode = 2
+editable = false
+
+[node name="BtnBrowse" type="Button" parent="SettingDialog/MarginContainer/Row/ColSaveDir"]
+layout_mode = 2
+text = "Browse"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="SettingDialog/MarginContainer/Row"]
+layout_mode = 2
+alignment = 1
+
+[node name="BtnSave" type="Button" parent="SettingDialog/MarginContainer/Row/HBoxContainer"]
+layout_mode = 2
+text = " Save "
+
+[node name="FileDialog" type="FileDialog" parent="."]

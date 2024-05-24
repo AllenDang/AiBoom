@@ -4,11 +4,16 @@ extends Node
 @onready var btn_generate: Button = $PanelContainer/LeftRow/Col/CenterContainer/BtnGenerate
 @onready var toast: PanelContainer = $Toast
 @onready var toast_label: Label = $Toast/HBoxContainer/Label
-@onready var le_save_path: LineEdit = $Settings/VBoxContainer/ColSaveDir/LeSavePath
-@onready var btn_browse: Button = $Settings/VBoxContainer/ColSaveDir/BtnBrowse
-@onready var file_dialog: FileDialog = $Settings/FileDialog
-@onready var le_open_ai_key: LineEdit = $Settings/VBoxContainer/ColOpenAI/LeOpenAIKey
-@onready var le_tripo_key: LineEdit = $Settings/VBoxContainer/ColTripo/LeTripoKey
+
+@onready var accept_dialog: AcceptDialog = $AcceptDialog
+
+@onready var setting_dialog: Window = $SettingDialog
+@onready var file_dialog: FileDialog = $FileDialog
+@onready var le_save_path: LineEdit = $SettingDialog/MarginContainer/Row/ColSaveDir/LeSavePath
+@onready var le_open_ai_key: LineEdit = $SettingDialog/MarginContainer/Row/ColOpenAI/LeOpenAIKey
+@onready var le_tripo_key: LineEdit = $SettingDialog/MarginContainer/Row/ColTripo/LeTripoKey
+@onready var btn_save: Button = $SettingDialog/MarginContainer/Row/HBoxContainer/BtnSave
+@onready var btn_browse: Button = $SettingDialog/MarginContainer/Row/ColSaveDir/BtnBrowse
 
 signal process_start(msg: String)
 signal process_change_status(msg: String)
@@ -21,6 +26,7 @@ const CFG_SEC_GENERAL = "General"
 const CFG_KEY_SAVE_DIR = "save_dir"
 const CFG_KEY_OPENAI = "openai"
 const CFG_KEY_TRIPO = "tripo"
+const CFG_KEY_SCALE = "scale"
 
 
 func _ready() -> void:
@@ -36,16 +42,20 @@ func _ready() -> void:
 	if config.has_section_key(CFG_SEC_GENERAL, CFG_KEY_TRIPO):
 		le_tripo_key.text = config.get_value(CFG_SEC_GENERAL, CFG_KEY_TRIPO)
 
+	if config.has_section_key(CFG_SEC_GENERAL, CFG_KEY_SCALE):
+		get_tree().root.content_scale_factor = config.get_value(CFG_SEC_GENERAL, CFG_KEY_SCALE)
+
 	process_start.connect(_on_process_start)
 	process_change_status.connect(_on_process_change_status)
 	process_finished.connect(_on_process_finished)
 
 	btn_generate.pressed.connect(_on_btn_generate_pressed)
 	btn_browse.pressed.connect(_on_btn_browse_pressed)
+	btn_save.pressed.connect(_on_btn_save_pressed)
 
-	le_open_ai_key.text_changed.connect(_on_le_open_ai_key_text_changed)
-	le_tripo_key.text_changed.connect(_on_le_tripo_key_text_changed)
 	file_dialog.dir_selected.connect(_on_file_dialog_dir_selected)
+
+	setting_dialog.close_requested.connect(_on_settings_dialog_close_requested)
 
 
 func _on_process_start(msg: String):
@@ -71,17 +81,25 @@ func _on_btn_generate_pressed():
 	var openai_key: String = config.get_value(CFG_SEC_GENERAL, CFG_KEY_OPENAI)
 	var tripo_key: String = config.get_value(CFG_SEC_GENERAL, CFG_KEY_TRIPO)
 	if (
-		save_dir != null
-		and openai_key != null
-		and tripo_key != null
-		and save_dir.length() > 0
-		and openai_key.length() > 0
-		and tripo_key.length() > 0
+		save_dir == null
+		or openai_key == null
+		or tripo_key == null
+		or save_dir.length() == 0
+		or openai_key.length() == 0
+		or tripo_key.length() == 0
 	):
-		var viewport = get_viewport()
-		viewport.debug_draw = RenderingServer.VIEWPORT_DEBUG_DRAW_DISABLED
+		setting_dialog.popup_centered()
+		return
 
-		openai_generate_image()
+	if le_prompt.text.length() == 0:
+		accept_dialog.dialog_text = "Prompt cannot be empty."
+		accept_dialog.popup_centered()
+		return
+
+	var viewport = get_viewport()
+	viewport.debug_draw = RenderingServer.VIEWPORT_DEBUG_DRAW_DISABLED
+
+	openai_generate_image()
 
 
 func _on_btn_browse_pressed():
@@ -90,18 +108,19 @@ func _on_btn_browse_pressed():
 
 func _on_file_dialog_dir_selected(dir: String):
 	le_save_path.text = dir
-	config.set_value(CFG_SEC_GENERAL, CFG_KEY_SAVE_DIR, dir)
+
+
+func _on_btn_save_pressed():
+	config.set_value(CFG_SEC_GENERAL, CFG_KEY_OPENAI, le_open_ai_key.text)
+	config.set_value(CFG_SEC_GENERAL, CFG_KEY_TRIPO, le_tripo_key.text)
+	config.set_value(CFG_SEC_GENERAL, CFG_KEY_SAVE_DIR, le_save_path.text)
+
 	config.save(CFG_SAVE_PATH)
+	setting_dialog.hide()
 
 
-func _on_le_open_ai_key_text_changed(new_text: String):
-	config.set_value(CFG_SEC_GENERAL, CFG_KEY_OPENAI, new_text)
-	config.save(CFG_SAVE_PATH)
-
-
-func _on_le_tripo_key_text_changed(new_text: String):
-	config.set_value(CFG_SEC_GENERAL, CFG_KEY_TRIPO, new_text)
-	config.save(CFG_SAVE_PATH)
+func _on_settings_dialog_close_requested():
+	setting_dialog.hide()
 
 
 func trim_prefix(input_string: String) -> String:
@@ -128,6 +147,7 @@ func openai_generate_image():
 		"prompt": le_prompt.text,
 		"n": 1,
 		"size": "1024x1024",
+		"quality": "hd",
 	}
 	EasyHttp.new(self, _on_dalle_completed, _on_dalle_error).post(
 		"https://api.openai.com/v1/images/generations", headers, JSON.stringify(body)
@@ -205,3 +225,16 @@ func _input(event: InputEvent) -> void:
 			viewport.debug_draw = RenderingServer.VIEWPORT_DEBUG_DRAW_WIREFRAME
 		else:
 			viewport.debug_draw = RenderingServer.VIEWPORT_DEBUG_DRAW_DISABLED
+
+	if event.is_action_pressed("ui_zoom_out"):
+		get_tree().root.content_scale_factor += 0.2
+		config.set_value(CFG_SEC_GENERAL, CFG_KEY_SCALE, get_tree().root.content_scale_factor)
+		config.save(CFG_SAVE_PATH)
+
+	if event.is_action_pressed("ui_zoom_in"):
+		get_tree().root.content_scale_factor -= 0.2
+		config.set_value(CFG_SEC_GENERAL, CFG_KEY_SCALE, get_tree().root.content_scale_factor)
+		config.save(CFG_SAVE_PATH)
+
+	if event.is_action_pressed("settings"):
+		setting_dialog.popup_centered()
