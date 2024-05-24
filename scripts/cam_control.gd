@@ -23,7 +23,7 @@ func _input(event: InputEvent) -> void:
 				translate(Vector3(0, 0, -zoom_speed))
 		elif event.button_index == MouseButton.MOUSE_BUTTON_WHEEL_DOWN:
 			translate(Vector3(0, 0, zoom_speed))
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
+		elif event.button_index == MOUSE_BUTTON_MIDDLE:
 			if event.pressed:
 				Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 				is_panning = true

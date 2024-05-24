@@ -185,7 +185,11 @@ func openai_describe_image(url: String):
 			{
 				"role": "system",
 				"content":
-				"Your task is to identify all objects in the image I provide, then give a description for each object. The description should include the type, shape, style, surface material, and color (or pattern) of the object. The description should be as concise as possible, as it will be used to generate corresponding 3D models. Each object's description should be on a separate line."
+				"""Your task is to identify all objects in the image I provide, then give a description for each object.
+				The description should include the type, shape, style, surface material, and color (or pattern) of the object.
+				The description should be as concise as possible, as it will be used to generate corresponding 3D models.
+				Each object's description should be on a separate line.
+				Generate description for one object at a time, do not descript lots of objects in one line."""
 			},
 			{
 				"role": "user",
