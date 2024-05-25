@@ -4,15 +4,16 @@ class_name TripoMesh
 
 const GROUP_TRIPO_MESH: String = "tripo_mesh"
 const GLTF_NODE: String = "gltf_node"
+const BOUNDING_BOX_NODE: String = "bounding_box"
 
 var prompt: String
 var task_id: String
 var save_to_dir: String
+var file_path: String
 
 # Bounding box
 var is_selected = false
-var bbox_mesh_instance = null
-var bbox_material = null
+var bbox_material = preload("res://materials/bounding_box_shader.material")
 
 # Variables to store the previous mouse position
 var _previous_mouse_position = Vector2.ZERO
@@ -51,10 +52,6 @@ func _ready() -> void:
 	var n = get_tree().get_nodes_in_group(GROUP_TRIPO_MESH).size()
 	position = _generate_spiral_grid(n, 1.2, 1.2)
 
-	self.progress = prefab_progress_indicator_3d.instantiate()
-	self.progress.name = "progress"
-	add_child(self.progress)
-
 	create_task(self.prompt)
 
 
@@ -80,21 +77,34 @@ func _input(event):
 
 			var result = space_state.intersect_ray(query)
 
-			if result and result.collider.get_parent().name == GLTF_NODE:
+			if result and result.collider.get_parent().get_parent() == self:
 				is_selected = not is_selected
 				if is_selected:
-					draw_bounding_box()
+					get_node(GLTF_NODE).get_node(BOUNDING_BOX_NODE).show()
 				else:
-					bbox_mesh_instance.mesh.clear_surfaces()
+					get_node(GLTF_NODE).get_node(BOUNDING_BOX_NODE).hide()
 
 	# If the mouse is being dragged, rotate the node
 	if has_node(GLTF_NODE) and _dragging and event is InputEventMouseMotion:
 		var delta = event.relative
 		get_node(GLTF_NODE).rotate_y(delta.x * rotation_sensitivity)
 
+	# delete
+	if event.is_action_pressed("delete_selected") and self.is_selected:
+		# delete related model file
+		_delete_file(self.file_path)
+		queue_free()
+
+	# recreate
+	if (
+		event.is_action_pressed("recreate_selected")
+		and self.is_selected
+		and self.prompt.length() > 0
+	):
+		create_task(self.prompt)
+
 
 func _on_model_generate_success(url: String):
-	print("downloading %s" % [url])
 	EasyHttp.new(self, _on_download_success, _on_download_failed).download(
 		url, self._headers, self.save_to_dir
 	)
@@ -105,6 +115,8 @@ func _on_model_generate_failed():
 
 
 func _on_download_success(_code: int, data: Dictionary):
+	self.file_path = data.path
+
 	var gltf_doc = GLTFDocument.new()
 	var gltf_state = GLTFState.new()
 	var err = gltf_doc.append_from_file(data.path, gltf_state)
@@ -116,21 +128,22 @@ func _on_download_success(_code: int, data: Dictionary):
 		add_collision_shape_to_gltf(gltf_node, aabb)
 
 		# prepare bounding box
-		bbox_mesh_instance = MeshInstance3D.new()
+		var bbox_mesh_instance = MeshInstance3D.new()
+		bbox_mesh_instance.name = BOUNDING_BOX_NODE
+
+		var box_mesh = BoxMesh.new()
+		box_mesh.size = aabb.size
+		box_mesh.material = bbox_material
+
+		bbox_mesh_instance.mesh = box_mesh
+		bbox_mesh_instance.hide()
+
 		gltf_node.add_child(bbox_mesh_instance)
-
-		var bbox_mesh = ImmediateMesh.new()
-		bbox_mesh_instance.mesh = bbox_mesh
-
-		bbox_material = StandardMaterial3D.new()
-		bbox_material.albedo_color = Color(1, 0, 0)  # Red color
-		bbox_mesh_instance.material_override = bbox_material
-
 		add_child(gltf_node)
-	else:
-		print("cannot load gltf scene")
 
-	self.progress.queue_free()
+		self.progress.queue_free()
+	else:
+		model_generate_failed.emit()
 
 
 func _on_download_failed(_code: int):
@@ -138,6 +151,22 @@ func _on_download_failed(_code: int):
 
 
 func create_task(_prompt: String):
+	# Clear children
+	if has_node(GLTF_NODE):
+		get_node(GLTF_NODE).queue_free()
+		self.task_id = ""
+		self.file_path = ""
+		self.is_selected = false
+
+	if self.progress != null:
+		self.progress.queue_free()
+
+	# Create progress indicator
+	self.progress = prefab_progress_indicator_3d.instantiate()
+	self.progress.name = "progress"
+	add_child(self.progress)
+
+	# Send request to tripo
 	var body = {
 		"type": "text_to_model",
 		"prompt": _prompt,
@@ -150,7 +179,6 @@ func create_task(_prompt: String):
 
 func _on_create_success(_code: int, data: Dictionary):
 	if data.code != 0:
-		print("failed to create task code %d message %s" % [data.code, data.message])
 		model_generate_failed.emit()
 		return
 
@@ -170,17 +198,14 @@ func query_task(taskID: String):
 
 func _on_query_success(_code: int, data: Dictionary):
 	if data.code != 0:
-		print("failed to query task")
 		model_generate_failed.emit()
 		return
 
 	match data.data.status:
 		"queued":
-			print("queued")
 			await get_tree().create_timer(1.0).timeout
 			query_task(data.data.task_id)
 		"running":
-			print("running...%d" % [data.data.progress])
 			self.progress.progress = data.data.progress
 			await get_tree().create_timer(1.0).timeout
 			query_task(data.data.task_id)
@@ -263,50 +288,20 @@ func add_collision_shape_to_gltf(gltf_node: Node3D, aabb: AABB):
 	gltf_node.add_child(static_body)
 
 
-func draw_bounding_box():
-	if not has_node(GLTF_NODE):
-		return
+func _delete_file(_file_path: String) -> bool:
+	var dir_access = DirAccess.open(_file_path.get_base_dir())
 
-	var aabb = get_gltf_aabb(get_node(GLTF_NODE))
+	if dir_access == null:
+		print("Failed to open directory.")
+		return false
 
-	var bbox_mesh = bbox_mesh_instance.mesh
-	bbox_mesh.clear_surfaces()
-
-	bbox_mesh.surface_begin(Mesh.PRIMITIVE_LINES, bbox_material)
-
-	var vertices = [
-		Vector3(aabb.position.x, aabb.position.y, aabb.position.z),
-		Vector3(aabb.position.x + aabb.size.x, aabb.position.y, aabb.position.z),
-		Vector3(aabb.position.x + aabb.size.x, aabb.position.y + aabb.size.y, aabb.position.z),
-		Vector3(aabb.position.x, aabb.position.y + aabb.size.y, aabb.position.z),
-		Vector3(aabb.position.x, aabb.position.y, aabb.position.z + aabb.size.z),
-		Vector3(aabb.position.x + aabb.size.x, aabb.position.y, aabb.position.z + aabb.size.z),
-		Vector3(
-			aabb.position.x + aabb.size.x,
-			aabb.position.y + aabb.size.y,
-			aabb.position.z + aabb.size.z
-		),
-		Vector3(aabb.position.x, aabb.position.y + aabb.size.y, aabb.position.z + aabb.size.z)
-	]
-
-	# Draw lines between the vertices to form the bounding box
-	var edges = [
-		[0, 1],
-		[1, 2],
-		[2, 3],
-		[3, 0],  # Bottom face
-		[4, 5],
-		[5, 6],
-		[6, 7],
-		[7, 4],  # Top face
-		[0, 4],
-		[1, 5],
-		[2, 6],
-		[3, 7]  # Vertical lines
-	]
-
-	for edge in edges:
-		bbox_mesh.surface_add_vertex(vertices[edge[0]])
-		bbox_mesh.surface_add_vertex(vertices[edge[1]])
-
-	bbox_mesh.surface_end()
+	if dir_access.file_exists(_file_path):
+		var result = dir_access.remove(_file_path)
+		if result == OK:
+			return true
+		else:
+			print("Error deleting file: %s" % result)
+			return false
+	else:
+		print("File does not exist.")
+		return false
