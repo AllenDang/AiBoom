@@ -58,7 +58,7 @@ grow_vertical = 0
 
 [node name="Label" type="Label" parent="CenterContainer"]
 layout_mode = 2
-text = "LMB: rotate  MMB: pan  Wheel: zoom  E: toogle wireframe  X: delete selected  R: re-generate selected  | +: ui zoom out  -: ui zoom in | ESC: setting"
+text = "E: toogle wireframe  X: delete selected  R: re-generate selected | LMB: rotate  MMB: pan  Wheel: zoom | +: ui zoom out  -: ui zoom in | ESC: setting"
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 anchors_preset = 12
