@@ -250,8 +250,6 @@ func _on_query_success(_code: int, data: Dictionary):
 		model_generate_failed.emit()
 		return
 
-	print(data)
-
 	match data.data.status:
 		"queued":
 			await get_tree().create_timer(1.0).timeout

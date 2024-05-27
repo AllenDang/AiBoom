@@ -16,4 +16,4 @@ func _process(_delta: float) -> void:
 		label.text = "%d%%" % [progress]
 	else:
 		texture_progress_bar.value = 0
-		label.text = "Running"
+		label.text = "Remeshing"
