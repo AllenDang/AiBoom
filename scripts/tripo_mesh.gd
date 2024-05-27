@@ -121,6 +121,9 @@ func _on_download_success(_code: int, data: Dictionary):
 	var gltf_state = GLTFState.new()
 	var err = gltf_doc.append_from_file(data.path, gltf_state)
 	if err == OK:
+		for mat in gltf_state.materials:
+			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
 		var gltf_node = gltf_doc.generate_scene(gltf_state)
 		gltf_node.name = GLTF_NODE
 
@@ -139,6 +142,7 @@ func _on_download_success(_code: int, data: Dictionary):
 		bbox_mesh_instance.hide()
 
 		gltf_node.add_child(bbox_mesh_instance)
+
 		add_child(gltf_node)
 
 		self.progress.queue_free()
