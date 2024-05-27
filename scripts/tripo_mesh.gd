@@ -49,14 +49,18 @@ func _init(_key: String, _prompt: String, _save_to_dir: String):
 func _ready() -> void:
 	add_to_group(GROUP_TRIPO_MESH)
 
-	var n = get_tree().get_nodes_in_group(GROUP_TRIPO_MESH).size()
-	position = _generate_spiral_grid(n, 1.2, 1.2)
+	if Global.tripo_mesh_empty_slots.size() > 0:
+		position = Global.tripo_mesh_empty_slots.pop_front()
+	else:
+		var n = get_tree().get_nodes_in_group(GROUP_TRIPO_MESH).size()
+		position = _generate_spiral_grid(n, 1.2, 1.2)
 
 	create_task(self.prompt)
 
 
 func _exit_tree() -> void:
 	remove_from_group(GROUP_TRIPO_MESH)
+	Global.tripo_mesh_empty_slots.append(position)
 
 
 func _input(event):

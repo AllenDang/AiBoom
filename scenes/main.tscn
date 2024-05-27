@@ -34,6 +34,8 @@ corner_radius_bottom_left = 8
 [node name="Root" type="Node3D"]
 script = ExtResource("1_ed30y")
 
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_7u4at")
 
