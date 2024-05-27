@@ -15,6 +15,9 @@ extends Node
 @onready var btn_save: Button = $SettingDialog/MarginContainer/Row/HBoxContainer/BtnSave
 @onready var btn_browse: Button = $SettingDialog/MarginContainer/Row/ColSaveDir/BtnBrowse
 
+@onready var texture_rect: TextureRect = $TextureRect
+@onready var http_request: HTTPRequest = $HTTPRequest
+
 signal process_start(msg: String)
 signal process_change_status(msg: String)
 signal process_finished(msg: String)
@@ -56,6 +59,8 @@ func _ready() -> void:
 	file_dialog.dir_selected.connect(_on_file_dialog_dir_selected)
 
 	setting_dialog.close_requested.connect(_on_settings_dialog_close_requested)
+
+	http_request.request_completed.connect(_on_http_request_completed)
 
 
 func _on_process_start(msg: String):
@@ -167,10 +172,21 @@ func _on_dalle_completed(_response_code: int, data: Dictionary):
 	var url = data.data[0].url
 	openai_describe_image(url)
 
+	# show image
+	http_request.request(url)
+
 
 func _on_dalle_error(_response_code: int):
 	process_finished.emit("Failed to generate image")
 	btn_generate.disabled = false
+
+
+func _on_http_request_completed(
+	_result: int, _resposne_code: int, _headers: PackedStringArray, body: PackedByteArray
+):
+	var image = Image.new()
+	image.load_png_from_buffer(body)
+	texture_rect.texture = ImageTexture.create_from_image(image)
 
 
 func openai_describe_image(url: String):

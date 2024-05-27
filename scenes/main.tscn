@@ -34,8 +34,6 @@ corner_radius_bottom_left = 8
 [node name="Root" type="Node3D"]
 script = ExtResource("1_ed30y")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_7u4at")
 
@@ -262,3 +260,18 @@ layout_mode = 2
 text = " Save "
 
 [node name="FileDialog" type="FileDialog" parent="."]
+
+[node name="TextureRect" type="TextureRect" parent="."]
+custom_minimum_size = Vector2(300, 300)
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -350.0
+offset_right = 216.0
+offset_bottom = -150.0
+grow_vertical = 0
+expand_mode = 2
+stretch_mode = 5
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]

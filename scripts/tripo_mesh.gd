@@ -178,7 +178,7 @@ func create_task(_prompt: String):
 	var body = {
 		"type": "text_to_model",
 		"prompt": _prompt,
-		"negative_prompt": "ugly incomplete discord blur",
+		"negative_prompt": "ugly incomplete distort blur",
 	}
 	EasyHttp.new(self, _on_create_success, _on_create_error).post(
 		"https://api.tripo3d.ai/v2/openapi/task", self._headers, JSON.stringify(body)

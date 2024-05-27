@@ -10,6 +10,7 @@ viewport_path = NodePath("SubViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2prk4"]
 resource_local_to_scene = true
+shading_mode = 0
 albedo_texture = SubResource("ViewportTexture_imiqb")
 
 [node name="ProgressIndicator3D" type="MeshInstance3D"]
