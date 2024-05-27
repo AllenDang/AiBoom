@@ -11,5 +11,9 @@ var progress: int = 0
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
-	texture_progress_bar.value = progress
-	label.text = "%d%%" % [progress]
+	if progress >= 0:
+		texture_progress_bar.value = progress
+		label.text = "%d%%" % [progress]
+	else:
+		texture_progress_bar.value = 0
+		label.text = "Running"

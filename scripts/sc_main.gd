@@ -1,22 +1,29 @@
 extends Node
 
-@onready var le_prompt: LineEdit = $PanelContainer/LeftRow/Col/LePrompt
-@onready var btn_generate: Button = $PanelContainer/LeftRow/Col/CenterContainer/BtnGenerate
-@onready var toast: PanelContainer = $Toast
-@onready var toast_label: Label = $Toast/HBoxContainer/Label
+@onready var le_prompt: LineEdit = $UI/PanelContainer/LeftRow/Col/LePrompt
+@onready var btn_generate: Button = $UI/PanelContainer/LeftRow/Col/CenterContainer/BtnGenerate
+@onready var toast: PanelContainer = $UI/Toast
+@onready var toast_label: Label = $UI/Toast/HBoxContainer/Label
 
-@onready var accept_dialog: AcceptDialog = $AcceptDialog
+@onready var accept_dialog: AcceptDialog = $UI/AcceptDialog
 
-@onready var setting_dialog: Window = $SettingDialog
-@onready var file_dialog: FileDialog = $FileDialog
-@onready var le_save_path: LineEdit = $SettingDialog/MarginContainer/Row/ColSaveDir/LeSavePath
-@onready var le_open_ai_key: LineEdit = $SettingDialog/MarginContainer/Row/ColOpenAI/LeOpenAIKey
-@onready var le_tripo_key: LineEdit = $SettingDialog/MarginContainer/Row/ColTripo/LeTripoKey
-@onready var btn_save: Button = $SettingDialog/MarginContainer/Row/HBoxContainer/BtnSave
-@onready var btn_browse: Button = $SettingDialog/MarginContainer/Row/ColSaveDir/BtnBrowse
+@onready var setting_dialog: Window = $UI/SettingDialog
+@onready var file_dialog: FileDialog = $UI/FileDialog
+@onready var le_save_path: LineEdit = $UI/SettingDialog/MarginContainer/Row/ColSaveDir/LeSavePath
+@onready var le_open_ai_key: LineEdit = $UI/SettingDialog/MarginContainer/Row/ColOpenAI/LeOpenAIKey
+@onready var le_tripo_key: LineEdit = $UI/SettingDialog/MarginContainer/Row/ColTripo/LeTripoKey
+@onready var btn_save: Button = $UI/SettingDialog/MarginContainer/Row/HBoxContainer/BtnSave
+@onready var btn_browse: Button = $UI/SettingDialog/MarginContainer/Row/ColSaveDir/BtnBrowse
 
-@onready var texture_rect: TextureRect = $TextureRect
-@onready var http_request: HTTPRequest = $HTTPRequest
+@onready var sb_facelimit: SpinBox = $UI/PanelContainer/LeftRow/RightRow/Col/SbFacelimit
+@onready var sb_texture_size: SpinBox = $UI/PanelContainer/LeftRow/RightRow/Col/SbTextureSize
+@onready var cb_pivot_to_bottom: CheckBox = $UI/PanelContainer/LeftRow/RightRow/Col/CbPivotToBottom
+
+@onready
+var btn_batch_convert: Button = $UI/PanelContainer/LeftRow/RightRow/CenterContainer/BtnBatchConvert
+
+@onready var texture_rect: TextureRect = $UI/TextureRect
+@onready var http_request: HTTPRequest = $UI/HTTPRequest
 
 signal process_start(msg: String)
 signal process_change_status(msg: String)
@@ -61,6 +68,8 @@ func _ready() -> void:
 	setting_dialog.close_requested.connect(_on_settings_dialog_close_requested)
 
 	http_request.request_completed.connect(_on_http_request_completed)
+
+	btn_batch_convert.pressed.connect(_on_btn_batch_convert_pressed)
 
 
 func _on_process_start(msg: String):
@@ -127,6 +136,14 @@ func _on_btn_save_pressed():
 
 func _on_settings_dialog_close_requested():
 	setting_dialog.hide()
+
+
+func _on_btn_batch_convert_pressed():
+	var tripo_meshes = get_tree().get_nodes_in_group("tripo_mesh")
+	for tripo_mesh in tripo_meshes:
+		tripo_mesh.convert(
+			sb_facelimit.value, sb_texture_size.value, cb_pivot_to_bottom.button_pressed
+		)
 
 
 func trim_prefix(input_string: String) -> String:

@@ -41,143 +41,127 @@ environment = SubResource("Environment_7u4at")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.81768)
 script = ExtResource("2_mw3nt")
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
-anchors_preset = 3
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="UI"]
+layout_mode = 2
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -676.0
+offset_left = -1117.0
 offset_top = -158.73
 offset_bottom = -135.73
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="Label" type="Label" parent="CenterContainer"]
+[node name="Label" type="Label" parent="UI/CenterContainer"]
 layout_mode = 2
 text = "E: toogle wireframe  X: delete selected  R: re-generate selected | LMB: rotate  MMB: pan  Wheel: zoom | +: ui zoom out  -: ui zoom in | ESC: setting"
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
-anchors_preset = 12
+[node name="PanelContainer" type="PanelContainer" parent="UI"]
+layout_mode = 2
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -133.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = ExtResource("2_h80cv")
 
-[node name="LeftRow" type="HBoxContainer" parent="PanelContainer"]
+[node name="LeftRow" type="HBoxContainer" parent="UI/PanelContainer"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Col" type="VBoxContainer" parent="PanelContainer/LeftRow"]
+[node name="Col" type="VBoxContainer" parent="UI/PanelContainer/LeftRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="Label" type="Label" parent="PanelContainer/LeftRow/Col"]
+[node name="Label" type="Label" parent="UI/PanelContainer/LeftRow/Col"]
 layout_mode = 2
 text = "Prompt"
 
-[node name="LePrompt" type="LineEdit" parent="PanelContainer/LeftRow/Col"]
+[node name="LePrompt" type="LineEdit" parent="UI/PanelContainer/LeftRow/Col"]
 layout_mode = 2
 
-[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/LeftRow/Col"]
+[node name="CenterContainer" type="CenterContainer" parent="UI/PanelContainer/LeftRow/Col"]
 layout_mode = 2
 
-[node name="BtnGenerate" type="Button" parent="PanelContainer/LeftRow/Col/CenterContainer"]
+[node name="BtnGenerate" type="Button" parent="UI/PanelContainer/LeftRow/Col/CenterContainer"]
 layout_mode = 2
 text = "Generate"
 
-[node name="RightRow" type="VBoxContainer" parent="PanelContainer/LeftRow"]
+[node name="RightRow" type="VBoxContainer" parent="UI/PanelContainer/LeftRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="Label" type="Label" parent="PanelContainer/LeftRow/RightRow"]
+[node name="Label" type="Label" parent="UI/PanelContainer/LeftRow/RightRow"]
 layout_mode = 2
-text = "Convert"
+text = "Remesh"
 
-[node name="Col" type="HBoxContainer" parent="PanelContainer/LeftRow/RightRow"]
+[node name="Col" type="HBoxContainer" parent="UI/PanelContainer/LeftRow/RightRow"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="CbQuad" type="CheckBox" parent="PanelContainer/LeftRow/RightRow/Col"]
-layout_mode = 2
-text = "QuadRemesh"
-
-[node name="Label" type="Label" parent="PanelContainer/LeftRow/RightRow/Col"]
+[node name="Label" type="Label" parent="UI/PanelContainer/LeftRow/RightRow/Col"]
 layout_mode = 2
 text = "Face limit"
 
-[node name="SbFacelimit" type="SpinBox" parent="PanelContainer/LeftRow/RightRow/Col"]
+[node name="SbFacelimit" type="SpinBox" parent="UI/PanelContainer/LeftRow/RightRow/Col"]
 layout_mode = 2
-max_value = 50000.0
-step = 1000.0
-value = 50000.0
+max_value = 30000.0
+step = 100.0
+value = 1000.0
 
-[node name="Label2" type="Label" parent="PanelContainer/LeftRow/RightRow/Col"]
-layout_mode = 2
-text = "Texture format"
-
-[node name="ObTextureFormat" type="OptionButton" parent="PanelContainer/LeftRow/RightRow/Col"]
-layout_mode = 2
-item_count = 6
-selected = 0
-popup/item_0/text = "JPEG"
-popup/item_0/id = 0
-popup/item_1/text = "PNG"
-popup/item_1/id = 1
-popup/item_2/text = "BMP"
-popup/item_2/id = 2
-popup/item_3/text = "TGA"
-popup/item_3/id = 3
-popup/item_4/text = "HDR"
-popup/item_4/id = 4
-popup/item_5/text = "DDX"
-popup/item_5/id = 5
-
-[node name="Label3" type="Label" parent="PanelContainer/LeftRow/RightRow/Col"]
+[node name="Label3" type="Label" parent="UI/PanelContainer/LeftRow/RightRow/Col"]
 layout_mode = 2
 text = "Texture size"
 
-[node name="SbTextureSize" type="SpinBox" parent="PanelContainer/LeftRow/RightRow/Col"]
+[node name="SbTextureSize" type="SpinBox" parent="UI/PanelContainer/LeftRow/RightRow/Col"]
 layout_mode = 2
 max_value = 2048.0
-step = 100.0
-value = 2000.0
+step = 32.0
+value = 512.0
 
-[node name="CbPivotToBottom" type="CheckBox" parent="PanelContainer/LeftRow/RightRow/Col"]
+[node name="CbPivotToBottom" type="CheckBox" parent="UI/PanelContainer/LeftRow/RightRow/Col"]
 layout_mode = 2
 text = "Pivot to buttom"
 
-[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/LeftRow/RightRow"]
+[node name="CenterContainer" type="CenterContainer" parent="UI/PanelContainer/LeftRow/RightRow"]
 layout_mode = 2
 
-[node name="BtnBatchConvert" type="Button" parent="PanelContainer/LeftRow/RightRow/CenterContainer"]
+[node name="BtnBatchConvert" type="Button" parent="UI/PanelContainer/LeftRow/RightRow/CenterContainer"]
 layout_mode = 2
-text = "Batch Convert"
+text = "Batch Remesh"
 
-[node name="Toast" type="PanelContainer" parent="."]
+[node name="Toast" type="PanelContainer" parent="UI"]
 visible = false
-anchors_preset = 8
+layout_mode = 2
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
+offset_left = -103.5
+offset_top = -56.0
+offset_right = 103.5
+offset_bottom = 56.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_363vl")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Toast"]
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Toast"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="Spinner" type="TextureProgressBar" parent="Toast/HBoxContainer"]
+[node name="Spinner" type="TextureProgressBar" parent="UI/Toast/HBoxContainer"]
 layout_mode = 2
 value = 100.0
 fill_mode = 4
@@ -185,19 +169,19 @@ texture_progress = ExtResource("2_rm6on")
 radial_fill_degrees = 60.0
 script = ExtResource("4_idnar")
 
-[node name="Label" type="Label" parent="Toast/HBoxContainer"]
+[node name="Label" type="Label" parent="UI/Toast/HBoxContainer"]
 layout_mode = 2
 text = "Loading...."
 
-[node name="AcceptDialog" type="AcceptDialog" parent="."]
+[node name="AcceptDialog" type="AcceptDialog" parent="UI"]
 size = Vector2i(334, 100)
 
-[node name="SettingDialog" type="Window" parent="."]
+[node name="SettingDialog" type="Window" parent="UI"]
 title = "Settings"
 size = Vector2i(620, 170)
 visible = false
 
-[node name="MarginContainer" type="MarginContainer" parent="SettingDialog"]
+[node name="MarginContainer" type="MarginContainer" parent="UI/SettingDialog"]
 offset_right = 40.0
 offset_bottom = 40.0
 theme_override_constants/margin_left = 16
@@ -205,73 +189,73 @@ theme_override_constants/margin_top = 16
 theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 16
 
-[node name="Row" type="VBoxContainer" parent="SettingDialog/MarginContainer"]
+[node name="Row" type="VBoxContainer" parent="UI/SettingDialog/MarginContainer"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ColOpenAI" type="HBoxContainer" parent="SettingDialog/MarginContainer/Row"]
+[node name="ColOpenAI" type="HBoxContainer" parent="UI/SettingDialog/MarginContainer/Row"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="SettingDialog/MarginContainer/Row/ColOpenAI"]
+[node name="Label" type="Label" parent="UI/SettingDialog/MarginContainer/Row/ColOpenAI"]
 custom_minimum_size = Vector2(117, 2.08165e-12)
 layout_mode = 2
 text = "OpenAI Key"
 
-[node name="LeOpenAIKey" type="LineEdit" parent="SettingDialog/MarginContainer/Row/ColOpenAI"]
+[node name="LeOpenAIKey" type="LineEdit" parent="UI/SettingDialog/MarginContainer/Row/ColOpenAI"]
 custom_minimum_size = Vector2(400, 2.08165e-12)
 layout_mode = 2
 secret = true
 
-[node name="ColTripo" type="HBoxContainer" parent="SettingDialog/MarginContainer/Row"]
+[node name="ColTripo" type="HBoxContainer" parent="UI/SettingDialog/MarginContainer/Row"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="SettingDialog/MarginContainer/Row/ColTripo"]
+[node name="Label" type="Label" parent="UI/SettingDialog/MarginContainer/Row/ColTripo"]
 custom_minimum_size = Vector2(117, 2.08165e-12)
 layout_mode = 2
 text = "Tripo API Key"
 
-[node name="LeTripoKey" type="LineEdit" parent="SettingDialog/MarginContainer/Row/ColTripo"]
+[node name="LeTripoKey" type="LineEdit" parent="UI/SettingDialog/MarginContainer/Row/ColTripo"]
 custom_minimum_size = Vector2(400, 2.08165e-12)
 layout_mode = 2
 secret = true
 
-[node name="ColSaveDir" type="HBoxContainer" parent="SettingDialog/MarginContainer/Row"]
+[node name="ColSaveDir" type="HBoxContainer" parent="UI/SettingDialog/MarginContainer/Row"]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="SettingDialog/MarginContainer/Row/ColSaveDir"]
+[node name="Label" type="Label" parent="UI/SettingDialog/MarginContainer/Row/ColSaveDir"]
 layout_mode = 2
 text = "Save models to"
 
-[node name="LeSavePath" type="LineEdit" parent="SettingDialog/MarginContainer/Row/ColSaveDir"]
+[node name="LeSavePath" type="LineEdit" parent="UI/SettingDialog/MarginContainer/Row/ColSaveDir"]
 custom_minimum_size = Vector2(400, 2.08165e-12)
 layout_mode = 2
 editable = false
 
-[node name="BtnBrowse" type="Button" parent="SettingDialog/MarginContainer/Row/ColSaveDir"]
+[node name="BtnBrowse" type="Button" parent="UI/SettingDialog/MarginContainer/Row/ColSaveDir"]
 layout_mode = 2
 text = "Browse"
 
-[node name="HBoxContainer" type="HBoxContainer" parent="SettingDialog/MarginContainer/Row"]
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/SettingDialog/MarginContainer/Row"]
 layout_mode = 2
 alignment = 1
 
-[node name="BtnSave" type="Button" parent="SettingDialog/MarginContainer/Row/HBoxContainer"]
+[node name="BtnSave" type="Button" parent="UI/SettingDialog/MarginContainer/Row/HBoxContainer"]
 layout_mode = 2
 text = " Save "
 
-[node name="FileDialog" type="FileDialog" parent="."]
+[node name="FileDialog" type="FileDialog" parent="UI"]
 
-[node name="TextureRect" type="TextureRect" parent="."]
+[node name="TextureRect" type="TextureRect" parent="UI"]
 custom_minimum_size = Vector2(300, 300)
-anchors_preset = 2
+layout_mode = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -350.0
-offset_right = 216.0
+offset_top = -450.0
+offset_right = 316.0
 offset_bottom = -150.0
 grow_vertical = 0
 expand_mode = 2
 stretch_mode = 5
 
-[node name="HTTPRequest" type="HTTPRequest" parent="."]
+[node name="HTTPRequest" type="HTTPRequest" parent="UI"]

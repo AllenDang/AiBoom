@@ -11,6 +11,9 @@ var task_id: String
 var save_to_dir: String
 var file_path: String
 
+enum stage { EMPTY, DRAFT, CONVERTED }
+var current_stage: stage = stage.EMPTY
+
 # Bounding box
 var is_selected = false
 var bbox_material = preload("res://materials/bounding_box_shader.material")
@@ -184,6 +187,8 @@ func create_task(_prompt: String):
 		"https://api.tripo3d.ai/v2/openapi/task", self._headers, JSON.stringify(body)
 	)
 
+	self.current_stage = stage.DRAFT
+
 
 func _on_create_success(_code: int, data: Dictionary):
 	if data.code != 0:
@@ -198,6 +203,42 @@ func _on_create_error(_code: int):
 	model_generate_failed.emit()
 
 
+func convert(face_limit: int, texture_size: int, pivot_to_bottom: bool):
+	if current_stage != stage.DRAFT and not has_node(GLTF_NODE):
+		return
+
+	# Clear children
+	if has_node(GLTF_NODE):
+		get_node(GLTF_NODE).queue_free()
+		self.file_path = ""
+		self.is_selected = false
+
+	if self.progress != null:
+		self.progress.queue_free()
+
+	# Create progress indicator
+	self.progress = prefab_progress_indicator_3d.instantiate()
+	self.progress.name = "progress"
+	self.progress.progress = -1
+	add_child(self.progress)
+
+	self.current_stage = stage.CONVERTED
+
+	# Send request to tripo
+	var body = {
+		"type": "convert_model",
+		"format": "GLTF",
+		"original_model_task_id": self.task_id,
+		"quad": true,
+		"face_limit": face_limit,
+		"texture_size": texture_size,
+		"pivot_to_center_bottom": pivot_to_bottom,
+	}
+	EasyHttp.new(self, _on_create_success, _on_create_error).post(
+		"https://api.tripo3d.ai/v2/openapi/task", self._headers, JSON.stringify(body)
+	)
+
+
 func query_task(taskID: String):
 	EasyHttp.new(self, _on_query_success, _on_query_error).http_get(
 		"https://api.tripo3d.ai/v2/openapi/task/%s" % [taskID], self._headers
@@ -209,12 +250,18 @@ func _on_query_success(_code: int, data: Dictionary):
 		model_generate_failed.emit()
 		return
 
+	print(data)
+
 	match data.data.status:
 		"queued":
 			await get_tree().create_timer(1.0).timeout
 			query_task(data.data.task_id)
 		"running":
-			self.progress.progress = data.data.progress
+			if self.current_stage == stage.DRAFT:
+				self.progress.progress = data.data.progress
+			else:
+				self.progress.progress = -1
+
 			await get_tree().create_timer(1.0).timeout
 			query_task(data.data.task_id)
 		"success":
